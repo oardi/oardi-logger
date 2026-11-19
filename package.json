@@ -1,0 +1,44 @@
+{
+	"name": "@oardi/ts-logger",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Dependency-free logging with console output and listeners, installed directly from GitHub.",
+	"license": "MIT",
+	"author": "Ardian Shala",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/oardi/oardi-ts-logger.git"
+	},
+	"type": "commonjs",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js",
+			"default": "./dist/index.mjs"
+		}
+	},
+	"sideEffects": false,
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "node scripts/build.mjs",
+		"prepare": "npm run build",
+		"test": "vitest run",
+		"test:types": "tsc --project tsconfig.test.json",
+		"test:package": "node scripts/package-smoke-test.mjs",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"format:fix": "prettier --write .",
+		"validate": "npm run build && npm run test:types && npm test && npm run test:package && npm run format:check"
+	},
+	"devDependencies": {
+		"prettier": "^3.10.1",
+		"typescript": "7.0.2",
+		"vitest": "5.0.5"
+	}
+}
