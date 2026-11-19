@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 - 2026-11-19
+
+- Name the package `@oardi/logger` and the repository `oardi-logger`.
+
 ## 0.1.0 - 2026-11-19
 
 - Extract `Logger`, `LoggerType`, `LoggerPayload`, and `LoggerListener` from

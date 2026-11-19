@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Logger, LoggerType } from '@oardi/ts-logger';
+import { Logger, LoggerType } from '@oardi/logger';
 
 afterEach(() => {
 	Logger.clearListeners();

@@ -2,7 +2,7 @@
 
 ## Scope and structure
 
-- Supply `@oardi/ts-logger` directly from GitHub, pinned to a release tag or full
+- Supply `@oardi/logger` directly from GitHub, pinned to a release tag or full
   commit hash. Do not configure a registry or publish to npm. Keep `private: true`.
 - Keep the package focused on `Logger`, `LoggerType`, `LoggerPayload`, and
   `LoggerListener`. Preserve the extracted API and behavior unless asked to change it.

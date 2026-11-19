@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const require = createRequire(import.meta.url);
-const temporary = mkdtempSync(join(tmpdir(), 'oardi-ts-logger-package-'));
+const temporary = mkdtempSync(join(tmpdir(), 'oardi-logger-package-'));
 const npm = (args, cwd) =>
 	execFileSync('npm', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
 
@@ -45,7 +45,7 @@ try {
 	);
 
 	const manifest = JSON.parse(
-		readFileSync(join(temporary, 'node_modules/@oardi/ts-logger/package.json'), 'utf8')
+		readFileSync(join(temporary, 'node_modules/@oardi/logger/package.json'), 'utf8')
 	);
 	assert.equal(manifest.private, true);
 	assert.equal(Object.keys(manifest.dependencies ?? {}).length, 0);
@@ -56,9 +56,9 @@ try {
 		`
         import assert from 'node:assert/strict';
         import { createRequire } from 'node:module';
-        import * as esm from '@oardi/ts-logger';
+        import * as esm from '@oardi/logger';
         const require = createRequire(import.meta.url);
-        const cjs = require('@oardi/ts-logger');
+        const cjs = require('@oardi/logger');
         assert.deepEqual(Object.keys(esm).sort(), ['Logger', 'LoggerType']);
         assert.deepEqual(Object.keys(cjs).sort(), ['Logger', 'LoggerType']);
         assert.equal(esm.Logger, cjs.Logger);

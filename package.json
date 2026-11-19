@@ -1,13 +1,13 @@
 {
-	"name": "@oardi/ts-logger",
-	"version": "0.1.0",
+	"name": "@oardi/logger",
+	"version": "0.2.0",
 	"private": true,
 	"description": "Dependency-free logging with console output and listeners, installed directly from GitHub.",
 	"license": "MIT",
 	"author": "Ardian Shala",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/oardi/oardi-ts-logger.git"
+		"url": "https://github.com/oardi/oardi-logger.git"
 	},
 	"type": "commonjs",
 	"main": "./dist/index.js",

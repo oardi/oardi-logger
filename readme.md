@@ -1,4 +1,4 @@
-# @oardi/ts-logger
+# @oardi/logger
 
 Small, dependency-free logging utility extracted from `@oardi/ts-utils`.
 Supports console output, synchronous listeners, five log levels, and a global
@@ -9,7 +9,7 @@ enable switch. Installed directly from GitHub; not published to an npm registry.
 Pin the dependency to a release tag:
 
 ```sh
-npm install @oardi/ts-logger@github:oardi/oardi-ts-logger#v0.1.0
+npm install @oardi/logger@github:oardi/oardi-logger#v0.1.0
 ```
 
 The tag must exist before installation. This command describes the intended
@@ -18,7 +18,7 @@ The tag must exist before installation. This command describes the intended
 Alternatively, replace `<full-commit-hash>` with an existing 40-character commit SHA:
 
 ```sh
-npm install "@oardi/ts-logger@github:oardi/oardi-ts-logger#<full-commit-hash>"
+npm install "@oardi/logger@github:oardi/oardi-logger#<full-commit-hash>"
 ```
 
 Commit the consumer's updated `package.json` and `package-lock.json`. Use a tag or
@@ -30,8 +30,8 @@ GitHub installations; allow install scripts for that build.
 ## Usage
 
 ```ts
-import { Logger, LoggerType } from '@oardi/ts-logger';
-import type { LoggerListener, LoggerPayload } from '@oardi/ts-logger';
+import { Logger, LoggerType } from '@oardi/logger';
+import type { LoggerListener, LoggerPayload } from '@oardi/logger';
 
 Logger.info('Application started', { environment: 'development' });
 Logger.warn('Low disk space', 1024);
@@ -48,7 +48,7 @@ unsubscribe();
 CommonJS is supported too:
 
 ```js
-const { Logger } = require('@oardi/ts-logger');
+const { Logger } = require('@oardi/logger');
 Logger.info('Application started');
 ```
 

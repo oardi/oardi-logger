@@ -1,5 +1,5 @@
-import { Logger, LoggerType } from '@oardi/ts-logger';
-import type { LoggerListener, LoggerPayload } from '@oardi/ts-logger';
+import { Logger, LoggerType } from '@oardi/logger';
+import type { LoggerListener, LoggerPayload } from '@oardi/logger';
 
 const listener: LoggerListener = payload => {
 	const level: LoggerType = payload.type;
