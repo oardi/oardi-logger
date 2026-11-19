@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 - 2026-11-19
+
+- Remove once-listeners before their callback so recursive logging invokes them
+  only once.
+- Cover listener errors, repeated unsubscribe, clearing, re-enabling, and changes
+  during logging with regression tests.
+
 ## 0.2.0 - 2026-11-19
 
 - Name the package `@oardi/logger` and the repository `oardi-logger`.

@@ -62,11 +62,9 @@ export class Logger {
 	public static onLog(listener: LoggerListener, once = false): () => void {
 		if (once) {
 			const wrapper: LoggerListener = payload => {
-				try {
-					return listener(payload);
-				} finally {
-					Logger.listeners.delete(wrapper);
-				}
+				// Remove first so nested logging cannot invoke this listener again.
+				Logger.listeners.delete(wrapper);
+				return listener(payload);
 			};
 			Logger.listeners.add(wrapper);
 			return () => Logger.listeners.delete(wrapper);

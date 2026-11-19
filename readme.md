@@ -1,136 +1,95 @@
 # @oardi/logger
 
-Small, dependency-free logging utility extracted from `@oardi/ts-utils`.
-Supports console output, synchronous listeners, five log levels, and a global
-enable switch. Installed directly from GitHub; not published to an npm registry.
+Small, dependency-free logger with five log levels, synchronous listeners, and a
+global enable switch. Supports ESM, CommonJS, and TypeScript.
 
 ## Installation
 
-Pin the dependency to a release tag:
+Install directly from GitHub, pinned to a release tag:
 
 ```sh
-npm install @oardi/logger@github:oardi/oardi-logger#v0.1.0
+npm install @oardi/logger@github:oardi/oardi-logger#v0.3.0
 ```
 
-The tag must exist before installation. This command describes the intended
-`0.1.0` release; tags are created only on explicit request.
+The release tag must exist on GitHub before installation.
 
-Alternatively, replace `<full-commit-hash>` with an existing 40-character commit SHA:
+Or replace `<full-commit-hash>` with an existing 40-character commit SHA:
 
 ```sh
 npm install "@oardi/logger@github:oardi/oardi-logger#<full-commit-hash>"
 ```
 
-Commit the consumer's updated `package.json` and `package-lock.json`. Use a tag or
-full commit hash rather than a branch. No registry configuration is needed.
-Unlike `@oardi/ts-types`, this package includes runtime code and is installed as a
-regular dependency. npm runs `prepare` to build JavaScript and declarations for
-GitHub installations; allow install scripts for that build.
+Allow install scripts: `prepare` builds the package during GitHub installation.
+Commit the consumer's `package.json` and lockfile. No npm registry setup is needed.
 
 ## Usage
 
 ```ts
 import { Logger, LoggerType } from '@oardi/logger';
-import type { LoggerListener, LoggerPayload } from '@oardi/logger';
 
 Logger.info('Application started', { environment: 'development' });
-Logger.warn('Low disk space', 1024);
+Logger.error(new Error('Something went wrong'));
 
-const listener: LoggerListener = (payload: LoggerPayload) => {
+const unsubscribe = Logger.onLog(payload => {
 	if (payload.type === LoggerType.debug) return false;
-};
-const unsubscribe = Logger.onLog(listener);
+});
 
-Logger.debug('Visible to listeners, suppressed in the console');
+Logger.debug('Sent to listeners, hidden from the console');
 unsubscribe();
 ```
 
-CommonJS is supported too:
-
-```js
-const { Logger } = require('@oardi/logger');
-Logger.info('Application started');
-```
-
-ESM and CommonJS entry points share the same logger instance when resolved from
-the same installed package copy. The package requires no browser globals or
-initialization and does not log merely by being imported.
+CommonJS: `const { Logger, LoggerType } = require('@oardi/logger');`.
+Both formats share the same state within one installed package copy.
 
 ## API
 
-| API                                                         | Behavior                                                                  |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `log/info/warn/debug/error(...args: unknown[]): void`       | Notify listeners, then call the matching console method.                  |
-| `onLog(listener: LoggerListener, once = false): () => void` | Register a listener and return its unsubscribe function.                  |
-| `clearListeners(): void`                                    | Remove all listeners.                                                     |
-| `setEnabled(enabled: boolean): void`                        | Enable or suppress both listeners and console output; enabled by default. |
+All methods are static on `Logger`.
 
-`LoggerType` is a string enum with `log`, `info`, `warn`, `debug`, and `error`.
+| Method                                                      | Behavior                                                                      |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `log/info/warn/debug/error(...args: unknown[]): void`       | Notify listeners, then call the matching console method.                      |
+| `onLog(listener: LoggerListener, once = false): () => void` | Register a listener; return an unsubscribe function, safe to call repeatedly. |
+| `clearListeners(): void`                                    | Remove all listeners.                                                         |
+| `setEnabled(enabled: boolean): void`                        | Enable or suppress listeners and console output. Enabled by default.          |
+
+`LoggerType` contains `log`, `info`, `warn`, `debug`, and `error`.
+The package also exports these types:
 
 ```ts
 type LoggerPayload = {
 	type: LoggerType;
 	args: unknown[];
-	timestamp: string; // ISO timestamp generated for this log call
+	timestamp: string; // ISO timestamp of the log call
 };
 
 type LoggerListener = (payload: LoggerPayload) => void | boolean;
 ```
 
 Listeners run synchronously in registration order and receive the same payload.
-Returning `false` suppresses only the console call; later listeners still run.
-Other return values do not suppress output. Listener exceptions are swallowed,
-allowing later listeners and console output to continue. `once: true` removes
-the listener after its first invocation, including if it throws. Unsubscribe
-functions can be called repeatedly.
+Returning `false` suppresses only console output; later listeners still run.
+Listener exceptions are swallowed. With `once = true`, the listener is removed
+before its callback, so it runs at most once even if it throws or logs again.
+Listeners added during a log call receive that message too; removing or clearing
+listeners before their turn skips them.
 
-```ts
-Logger.onLog(payload => {
-	// Handle the first message only.
-	console.info(payload);
-}, true);
+## Development and releases
 
-Logger.setEnabled(false);
-Logger.info('Suppressed');
-Logger.setEnabled(true);
-Logger.clearListeners();
-```
-
-Listener registration and the enable switch are static, shared state within the
-installed package instance. The previous `@oardi/ts-utils` implementation remains
-a separate instance during migration; switch imports consistently when adopting
-this package. Consumer installation and removal of the old implementation are
-handled separately.
-
-## Local development
-
-With Node.js 24 and npm:
+Use Node.js 24 and npm:
 
 ```sh
 npm ci
 npm run validate
 ```
 
-`npm ci` also runs `prepare`. `npm run build` emits CommonJS JavaScript, an ESM
-entry point, and declarations into `dist/`; generated files are not checked in.
-`npm run validate` builds, checks public ESM/CommonJS TypeScript contracts, runs
-the extracted logger tests, installs a local package archive in an isolated
-consumer to verify runtime/type exports, and checks formatting. This archive
-check does not contact GitHub. `npm run format` applies formatting.
+Validation builds into ignored `dist/`, checks ESM/CommonJS types and behavior,
+installs a local package archive in an isolated consumer, and checks formatting.
+CI runs the same commands. `npm run format` applies formatting.
 
-GitHub Actions runs `npm ci` and `npm run validate` on pushes and pull requests.
-All dependencies are development tools; the installed package has no runtime
-or peer dependencies.
-
-## Versions and releases
-
-Keep `package.json`, both root version fields in `package-lock.json`, and the
-dated `changelog.md` entry aligned. Tags follow `v<version>`; `v0.1.0` must point
-to the commit containing the matching version and changelog.
-
-Run `npm run validate` before a release. Create commits or tags and push only
-when explicitly requested. There is no npm publication, registry setup, or
-automated release workflow.
+For a release, align `package.json`, both root version fields in
+`package-lock.json`, and the dated entry in `changelog.md`. After validation,
+create a `v<version>` tag on the matching commit. Commits, tags, and pushes require
+an explicit request. The package stays private and is distributed through GitHub;
+there is no npm publication or automated release.
 
 ## License
 
