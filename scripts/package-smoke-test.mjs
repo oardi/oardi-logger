@@ -65,7 +65,11 @@ try {
         assert.equal(esm.LoggerType, cjs.LoggerType);
         let received;
         const unsubscribe = esm.Logger.onLog(payload => { received = payload; return false; });
-        cjs.Logger.info('packed consumer', 42);
+        esm.Logger.setLevels([esm.LoggerType.error]);
+        cjs.Logger.info('filtered');
+        assert.equal(received, undefined);
+        cjs.Logger.setLevels([cjs.LoggerType.info]);
+        esm.Logger.info('packed consumer', 42);
         assert.equal(received.type, esm.LoggerType.info);
         assert.deepEqual(received.args, ['packed consumer', 42]);
         assert.equal(new Date(received.timestamp).toISOString(), received.timestamp);

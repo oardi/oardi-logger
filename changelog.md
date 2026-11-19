@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 - 2026-11-19
+
+- Add `Logger.setLevels()` to select enabled log levels for listeners and console
+  output. All levels are enabled by default; an empty selection suppresses all.
+- Preserve the level selection across the global enable switch and keep
+  once-listeners registered when messages are filtered out.
+
 ## 0.3.0 - 2026-11-19
 
 - Remove once-listeners before their callback so recursive logging invokes them

@@ -27,9 +27,12 @@ Logger.warn('message', 42);
 Logger.debug({ enabled: true });
 Logger.error(new Error('message'));
 Logger.setEnabled(false);
+const setLevelsResult: void = Logger.setLevels(levels);
+Logger.setLevels([LoggerType.warn, LoggerType.error] as const);
+Logger.setLevels([]);
 Logger.clearListeners();
 unsubscribe();
-void levels;
+void setLevelsResult;
 
 // @ts-expect-error Log levels must be members of LoggerType.
 const invalidLevel: LoggerType = 'trace';
@@ -37,6 +40,12 @@ const invalidLevel: LoggerType = 'trace';
 const invalidListener: LoggerListener = () => 'cancel';
 // @ts-expect-error The enabled flag must be a boolean.
 Logger.setEnabled('false');
+// @ts-expect-error Level selections must contain LoggerType members.
+Logger.setLevels(['info']);
+// @ts-expect-error The level selection must be an array.
+Logger.setLevels(LoggerType.info);
+// @ts-expect-error The level selection must be provided explicitly.
+Logger.setLevels();
 // @ts-expect-error Payload timestamps must be strings.
 const invalidPayload: LoggerPayload = { type: LoggerType.log, args: [], timestamp: 42 };
 // @ts-expect-error LoggerPayload has no runtime value.

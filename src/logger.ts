@@ -4,6 +4,7 @@ import type { LoggerListener, LoggerPayload } from './logger.types.js';
 export class Logger {
 	private static listeners: Set<LoggerListener> = new Set();
 	private static enabled = true;
+	private static levels: Set<LoggerType> = new Set(Object.values(LoggerType));
 
 	public static log(...args: unknown[]): void {
 		Logger.doLog(LoggerType.log, args);
@@ -33,8 +34,12 @@ export class Logger {
 		Logger.enabled = value;
 	}
 
+	public static setLevels(levels: readonly LoggerType[]): void {
+		Logger.levels = new Set(levels);
+	}
+
 	private static doLog(level: LoggerType, args: unknown[]): void {
-		if (!Logger.enabled) return;
+		if (!Logger.enabled || !Logger.levels.has(level)) return;
 
 		const payload: LoggerPayload = {
 			type: level,

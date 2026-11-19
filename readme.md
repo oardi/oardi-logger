@@ -8,7 +8,7 @@ global enable switch. Supports ESM, CommonJS, and TypeScript.
 Install directly from GitHub, pinned to a release tag:
 
 ```sh
-npm install @oardi/logger@github:oardi/oardi-logger#v0.3.0
+npm install @oardi/logger@github:oardi/oardi-logger#v0.4.0
 ```
 
 The release tag must exist on GitHub before installation.
@@ -36,6 +36,10 @@ const unsubscribe = Logger.onLog(payload => {
 
 Logger.debug('Sent to listeners, hidden from the console');
 unsubscribe();
+
+Logger.setLevels([LoggerType.warn, LoggerType.error]);
+Logger.debug('Skipped entirely');
+Logger.warn('Still logged');
 ```
 
 CommonJS: `const { Logger, LoggerType } = require('@oardi/logger');`.
@@ -51,6 +55,12 @@ All methods are static on `Logger`.
 | `onLog(listener: LoggerListener, once = false): () => void` | Register a listener; return an unsubscribe function, safe to call repeatedly. |
 | `clearListeners(): void`                                    | Remove all listeners.                                                         |
 | `setEnabled(enabled: boolean): void`                        | Enable or suppress listeners and console output. Enabled by default.          |
+| `setLevels(levels: readonly LoggerType[]): void`            | Replace the enabled levels for both listeners and console output.             |
+
+All levels are enabled by default. `setLevels([])` suppresses every level;
+`setLevels(Object.values(LoggerType))` restores all levels. The selection is
+copied and stays unchanged when toggling `setEnabled`. Filtered messages do not
+invoke listeners or consume once-listeners.
 
 `LoggerType` contains `log`, `info`, `warn`, `debug`, and `error`.
 The package also exports these types:

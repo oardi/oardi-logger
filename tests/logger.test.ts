@@ -4,6 +4,7 @@ import { Logger, LoggerType } from '@oardi/logger';
 afterEach(() => {
 	Logger.clearListeners();
 	Logger.setEnabled(true);
+	Logger.setLevels(Object.values(LoggerType));
 	vi.restoreAllMocks();
 });
 
@@ -28,6 +29,120 @@ describe('Logger', () => {
 			timestamp: expect.any(String),
 		});
 		expect(consoleSpy).toHaveBeenCalledWith('message', 42);
+	});
+
+	it.each(Object.values(LoggerType))('enables only the selected level %s', level => {
+		const consoleSpies = Object.values(LoggerType).map(type => ({
+			type,
+			spy: vi.spyOn(console, type).mockImplementation(() => {}),
+		}));
+		const listener = vi.fn();
+		Logger.onLog(listener);
+		Logger.setLevels([level]);
+
+		for (const type of Object.values(LoggerType)) Logger[type]('message', type);
+
+		expect(listener).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ type: level, args: ['message', level] })
+		);
+		for (const { type, spy } of consoleSpies) {
+			if (type === level) expect(spy).toHaveBeenCalledExactlyOnceWith('message', level);
+			else expect(spy).not.toHaveBeenCalled();
+		}
+	});
+
+	it('suppresses every level with an empty selection and can restore all levels', () => {
+		const consoleSpies = Object.values(LoggerType).map(type =>
+			vi.spyOn(console, type).mockImplementation(() => {})
+		);
+		const listener = vi.fn();
+		Logger.onLog(listener);
+		Logger.setLevels([]);
+
+		for (const type of Object.values(LoggerType)) Logger[type]('hidden');
+
+		expect(listener).not.toHaveBeenCalled();
+		for (const spy of consoleSpies) expect(spy).not.toHaveBeenCalled();
+
+		Logger.setLevels(Object.values(LoggerType));
+		for (const type of Object.values(LoggerType)) Logger[type]('visible');
+
+		expect(listener).toHaveBeenCalledTimes(5);
+		for (const spy of consoleSpies) expect(spy).toHaveBeenCalledExactlyOnceWith('visible');
+	});
+
+	it('replaces the selection instead of adding levels', () => {
+		const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const listener = vi.fn();
+		Logger.onLog(listener);
+		Logger.setLevels([LoggerType.info]);
+		Logger.setLevels([LoggerType.error]);
+
+		Logger.info('hidden');
+		Logger.error('visible');
+
+		expect(listener).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ type: LoggerType.error, args: ['visible'] })
+		);
+		expect(infoSpy).not.toHaveBeenCalled();
+		expect(errorSpy).toHaveBeenCalledExactlyOnceWith('visible');
+	});
+
+	it('copies the selection so later array changes do not affect logging', () => {
+		const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const levels = [LoggerType.info];
+		Logger.setLevels(levels);
+		levels[0] = LoggerType.error;
+
+		Logger.info('visible');
+		Logger.error('hidden');
+
+		expect(infoSpy).toHaveBeenCalledExactlyOnceWith('visible');
+		expect(errorSpy).not.toHaveBeenCalled();
+	});
+
+	it('preserves the level selection across the global enable switch', () => {
+		const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+		const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+		const listener = vi.fn();
+		Logger.onLog(listener);
+		Logger.setLevels([LoggerType.info]);
+		Logger.setEnabled(false);
+
+		Logger.info('disabled');
+		expect(listener).not.toHaveBeenCalled();
+		expect(infoSpy).not.toHaveBeenCalled();
+
+		Logger.setEnabled(true);
+		Logger.debug('filtered');
+		Logger.info('visible');
+
+		expect(listener).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ type: LoggerType.info, args: ['visible'] })
+		);
+		expect(infoSpy).toHaveBeenCalledExactlyOnceWith('visible');
+		expect(debugSpy).not.toHaveBeenCalled();
+	});
+
+	it('preserves once-listeners until an enabled level is logged', () => {
+		const debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+		const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+		const listener = vi.fn();
+		Logger.onLog(listener, true);
+		Logger.setLevels([LoggerType.info]);
+
+		Logger.debug('filtered');
+		expect(listener).not.toHaveBeenCalled();
+		Logger.info('first');
+		Logger.info('second');
+
+		expect(listener).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ type: LoggerType.info, args: ['first'] })
+		);
+		expect(debugSpy).not.toHaveBeenCalled();
+		expect(infoSpy).toHaveBeenCalledTimes(2);
 	});
 
 	it.each([false, true])('supports repeated unsubscribe with once=%s', once => {
