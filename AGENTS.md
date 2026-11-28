@@ -33,3 +33,9 @@
   dated release entry in `changelog.md` consistent.
 - Tags use `v<version>` and point to the commit with the matching release files.
 - Create commits or tags, push, or publish only on explicit user instruction.
+
+## Implementation
+
+Keep implementations simple, readable and focused while fully satisfying the requirements. Prefer existing project patterns, components, utilities and types when they fit the problem. Do not sacrifice correctness, robustness, accessibility or necessary validation for brevity or reuse.
+
+Do not add comments or JSDoc that merely restate self-explanatory code, names or behavior, including generic component summaries. Keep comments for non-obvious reasons, constraints, pitfalls and consumer usage notes that add information beyond the code itself.
